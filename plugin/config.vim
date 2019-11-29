@@ -102,7 +102,7 @@ function s:SelectIndent()
 endfunction
 
 
-if exists("g:vim_motion_maps")
+if exists("g:vim_motion_maps") && g:vim_motion_maps
     " Moving back and forth between lines of same or lower indentation.
     nnoremap <silent> <a-p> :call <SID>NextIndent(0, 0, 0, 1)<CR>
     nnoremap <silent> <a-n> :call <SID>NextIndent(0, 1, 0, 1)<CR>
