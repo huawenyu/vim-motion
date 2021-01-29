@@ -1,11 +1,11 @@
 " Version:      1.0
 
-if exists('g:loaded_vim_motion') || &compatible
-  finish
+if exists("s:init") || &compatible
+    finish
 else
-  let g:loaded_vim_motion = 'yes'
+    let s:init = 1
+    silent! let s:log = logger#getLogger(expand('<sfile>:t'))
 endif
-
 
 
 function! s:Indent(linenum, islog)
@@ -45,12 +45,15 @@ function! s:NextIndent(exclusive, fwd, lowerlevel, skipblanks)
         let is_log = 1
     endif
 
+    " if is_log
+    "     let indent = column - 1
+    " else
+    "     let indent = s:Indent(line, is_log)
+    " endif
+
     " indent by cursor position (only by-space), or by builtin indent (by-space/tab)
-    if is_log
-        let indent = column - 1
-    else
-        let indent = s:Indent(line, is_log)
-    endif
+    let indent = column - 1
+    "silent! call s:log.debug("column=", column, " indent=", indent)
 
     let stepvalue = a:fwd ? 1 : -1
     while (line > 0 && line <= lastline)
@@ -64,7 +67,9 @@ function! s:NextIndent(exclusive, fwd, lowerlevel, skipblanks)
             endif
         endif
 
-        if ( ! a:lowerlevel && s:Indent(line, is_log) == indent ||
+        let curr_indent = s:Indent(line, is_log)
+        "silent! call s:log.debug("curr-indent=", indent)
+        if ( ! a:lowerlevel && curr_indent == indent ||
                     \ a:lowerlevel && s:Indent(line, is_log) < indent)
             if (! a:skipblanks || strlen(getline(line)) > 0)
                 if (a:exclusive)
@@ -130,5 +135,11 @@ if exists("g:vim_motion_maps") && g:vim_motion_maps
     "onoremap <silent> ]L :call <SID>NextIndent(1, 1, 1, 1)<CR>
 
     nnoremap vip :call <SID>SelectIndent()<CR>
+else
+    command! -bar VimMotionPrev    call <SID>NextIndent(0, 0, 0, 1)
+    command! -bar VimMotionNext    call <SID>NextIndent(0, 1, 0, 1)
+
+    nnoremap <silent> <Plug>(VimMotionPrev) :\<C-U>call <SID>NextIndent(0, 0, 0, 1) <cr>
+    nnoremap <silent> <Plug>(VimMotionNext) :\<C-U>call <SID>NextIndent(0, 1, 0, 1) <cr>
 endif
 
