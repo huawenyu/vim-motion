@@ -53,7 +53,7 @@ function! s:NextIndent(exclusive, fwd, lowerlevel, skipblanks)
 
     " indent by cursor position (only by-space), or by builtin indent (by-space/tab)
     let indent = column - 1
-    "silent! call s:log.debug("column=", column, " indent=", indent)
+    silent! call s:log.debug("isLog=", is_log, " column=", column, " indent=", indent, " samelevel=", a:lowerlevel)
 
     let stepvalue = a:fwd ? 1 : -1
     while (line > 0 && line <= lastline)
@@ -68,7 +68,7 @@ function! s:NextIndent(exclusive, fwd, lowerlevel, skipblanks)
         endif
 
         let curr_indent = s:Indent(line, is_log)
-        "silent! call s:log.debug("curr-indent=", indent)
+        silent! call s:log.debug("curr-indent=", indent)
         if ( ! a:lowerlevel && curr_indent == indent ||
                     \ a:lowerlevel && s:Indent(line, is_log) < indent)
             if (! a:skipblanks || strlen(getline(line)) > 0)
