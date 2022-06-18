@@ -36,6 +36,11 @@ endfunction
 function! s:NextIndent(exclusive, fwd, lowerlevel, skipblanks)
     let line = line('.')
     let column = col('.')
+    " error
+    if column == 0
+        return
+    endif
+
     let lastline = line('$')
 
     " check logfile
@@ -52,8 +57,10 @@ function! s:NextIndent(exclusive, fwd, lowerlevel, skipblanks)
     " endif
 
     " indent by cursor position (only by-space), or by builtin indent (by-space/tab)
-    let indent = column - 1
-    silent! call s:log.debug("isLog=", is_log, " column=", column, " indent=", indent, " samelevel=", a:lowerlevel)
+    "let indent = (column - 1) * &tabstop
+    "let indent = s:Indent(line, is_log)
+    let indent = strdisplaywidth(getline('.')) - strdisplaywidth(getline('.')[col('.')-1:])
+    silent! call s:log.debug("isLog=", is_log, " column=", column, " indent=", indent, " lowerlevel=", a:lowerlevel, " skipblanks=", a:skipblanks)
 
     let stepvalue = a:fwd ? 1 : -1
     while (line > 0 && line <= lastline)
@@ -68,9 +75,9 @@ function! s:NextIndent(exclusive, fwd, lowerlevel, skipblanks)
         endif
 
         let curr_indent = s:Indent(line, is_log)
-        silent! call s:log.debug("curr-indent=", indent)
-        if ( ! a:lowerlevel && curr_indent == indent ||
-                    \ a:lowerlevel && s:Indent(line, is_log) < indent)
+        silent! call s:log.debug("curr-indent=", curr_indent, " len=", strlen(getline(line)))
+        if ( (! a:lowerlevel && curr_indent == indent) ||
+                    \ (a:lowerlevel && s:Indent(line, is_log) < indent))
             if (! a:skipblanks || strlen(getline(line)) > 0)
                 if (a:exclusive)
                     let line = line - stepvalue
@@ -109,30 +116,19 @@ endfunction
 
 if exists("g:vim_motion_maps") && g:vim_motion_maps
     " Moving back and forth between lines of same or lower indentation.
-    nnoremap <silent> <a-p> :call <SID>NextIndent(0, 0, 0, 1)<CR>
-    nnoremap <silent> <a-n> :call <SID>NextIndent(0, 1, 0, 1)<CR>
-    nnoremap <silent> <a-P> :call <SID>NextIndent(0, 0, 1, 1)<CR>
-    nnoremap <silent> <a-N> :call <SID>NextIndent(0, 1, 1, 1)<CR>
-    vnoremap <silent> <a-p> <Esc>:call <SID>NextIndent(0, 0, 0, 1)<CR>m'gv''
-    vnoremap <silent> <a-n> <Esc>:call <SID>NextIndent(0, 1, 0, 1)<CR>m'gv''
-    vnoremap <silent> <a-P> <Esc>:call <SID>NextIndent(0, 0, 1, 1)<CR>m'gv''
-    vnoremap <silent> <a-N> <Esc>:call <SID>NextIndent(0, 1, 1, 1)<CR>m'gv''
-    onoremap <silent> <a-p> :call <SID>NextIndent(0, 0, 0, 1)<CR>
-    onoremap <silent> <a-n> :call <SID>NextIndent(0, 1, 0, 1)<CR>
-    onoremap <silent> <a-P> :call <SID>NextIndent(1, 0, 1, 1)<CR>
-    onoremap <silent> <a-N> :call <SID>NextIndent(1, 1, 1, 1)<CR>
-    "nnoremap <silent> [l :call <SID>NextIndent(0, 0, 0, 1)<CR>
-    "nnoremap <silent> ]l :call <SID>NextIndent(0, 1, 0, 1)<CR>
-    "nnoremap <silent> [L :call <SID>NextIndent(0, 0, 1, 1)<CR>
-    "nnoremap <silent> ]L :call <SID>NextIndent(0, 1, 1, 1)<CR>
-    "vnoremap <silent> [l <Esc>:call <SID>NextIndent(0, 0, 0, 1)<CR>m'gv''
-    "vnoremap <silent> ]l <Esc>:call <SID>NextIndent(0, 1, 0, 1)<CR>m'gv''
-    "vnoremap <silent> [L <Esc>:call <SID>NextIndent(0, 0, 1, 1)<CR>m'gv''
-    "vnoremap <silent> ]L <Esc>:call <SID>NextIndent(0, 1, 1, 1)<CR>m'gv''
-    "onoremap <silent> [l :call <SID>NextIndent(0, 0, 0, 1)<CR>
-    "onoremap <silent> ]l :call <SID>NextIndent(0, 1, 0, 1)<CR>
-    "onoremap <silent> [L :call <SID>NextIndent(1, 0, 1, 1)<CR>
-    "onoremap <silent> ]L :call <SID>NextIndent(1, 1, 1, 1)<CR>
+
+    nnoremap <silent> <buffer> <a-p> :call <SID>NextIndent(0, 0, 0, 1)<CR>
+    nnoremap <silent> <buffer> <a-n> :call <SID>NextIndent(0, 1, 0, 1)<CR>
+    "nnoremap <silent> <buffer> <a-P> :call <SID>NextIndent(0, 0, 1, 1)<CR>
+    "nnoremap <silent> <buffer> <a-N> :call <SID>NextIndent(0, 1, 1, 1)<CR>
+    vnoremap <silent> <buffer> <a-p> <Esc>:call <SID>NextIndent(0, 0, 0, 1)<CR>m'gv''
+    vnoremap <silent> <buffer> <a-n> <Esc>:call <SID>NextIndent(0, 1, 0, 1)<CR>m'gv''
+    "vnoremap <silent> <buffer> <a-P> <Esc>:call <SID>NextIndent(0, 0, 1, 1)<CR>m'gv''
+    "vnoremap <silent> <buffer> <a-N> <Esc>:call <SID>NextIndent(0, 1, 1, 1)<CR>m'gv''
+    onoremap <silent> <buffer> <a-p> :call <SID>NextIndent(0, 0, 0, 1)<CR>
+    onoremap <silent> <buffer> <a-n> :call <SID>NextIndent(0, 1, 0, 1)<CR>
+    "onoremap <silent> <buffer> <a-P> :call <SID>NextIndent(1, 0, 1, 1)<CR>
+    "onoremap <silent> <buffer> <a-N> :call <SID>NextIndent(1, 1, 1, 1)<CR>
 
     nnoremap vip :call <SID>SelectIndent()<CR>
 else
