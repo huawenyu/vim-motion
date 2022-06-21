@@ -139,3 +139,37 @@ else
     nnoremap <silent> <Plug>(VimMotionNext) :\<C-U>call <SID>NextIndent(0, 1, 0, 1) <cr>
 endif
 
+
+" Depend on plugin https://github.com/skywind3000/vim-preview
+function! VimMotionPreview()
+    if !exists(":PreviewTag")
+        echomsg "Please install plugin 'skywind3000/vim-preview'!"
+        return
+    endif
+
+    let l:wtype = win_gettype()
+    if l:wtype == ""
+        let l:cur_id = win_getid()
+        " Check right window.
+        wincmd l
+        let l:alt_id = win_getid()
+        if l:alt_id != l:cur_id
+            set previewwindow
+            call win_gotoid(l:cur_id)
+        endif
+        exec ":PreviewTag "..utils#GetSelected('')
+    elseif l:wtype == "preview"
+        let oline = line('.')
+        let opos = getpos('.')
+        exec ":ptag "..utils#GetSelected('')
+        let cline = line('.')
+        if cline != oline
+            norm zz
+        else
+            call setpos('.', opos)
+        endif
+    endif
+
+endfun
+
+
