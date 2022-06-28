@@ -157,11 +157,11 @@ function! VimMotionPreview()
             set previewwindow
             call win_gotoid(l:cur_id)
         endif
-        exec ":PreviewTag "..utils#GetSelected('')
+        exec ":PreviewTag "..utils#GetSelected('n')
     elseif l:wtype == "preview"
         let oline = line('.')
         let opos = getpos('.')
-        exec ":ptag "..utils#GetSelected('')
+        exec ":ptag "..utils#GetSelected('n')
         let cline = line('.')
         if cline != oline
             norm zz
