@@ -86,6 +86,9 @@ function! s:NextIndent(exclusive, fwd, lowerlevel, skipblanks)
                 " column different when tabs
                 "   exe "normal " column . "|"
                 "exe "normal " column . "l"
+
+                "exe "normal "..line.."m]"
+                "exe "normal `]"
                 call cursor(line, column)
                 return
             endif
@@ -132,11 +135,11 @@ if exists("g:vim_motion_maps") && g:vim_motion_maps
 
     nnoremap vip :call <SID>SelectIndent()<CR>
 else
-    command! -bar VimMotionPrev    call <SID>NextIndent(0, 0, 0, 1)
-    command! -bar VimMotionNext    call <SID>NextIndent(0, 1, 0, 1)
+    "command! -bar VimMotionPrev    call <SID>NextIndent(0, 0, 0, 1)
+    "command! -bar VimMotionNext    call <SID>NextIndent(0, 1, 0, 1)
 
-    nnoremap <silent> <Plug>(VimMotionPrev) :\<C-U>call <SID>NextIndent(0, 0, 0, 1) <cr>
-    nnoremap <silent> <Plug>(VimMotionNext) :\<C-U>call <SID>NextIndent(0, 1, 0, 1) <cr>
+    map <silent> <Plug>_JumpPrevIndent :\<C-U>call <SID>NextIndent(0, 0, 0, 1) <cr>
+    map <silent> <Plug>_JumpNextIndent :\<C-U>call <SID>NextIndent(0, 1, 0, 1) <cr>
 endif
 
 
