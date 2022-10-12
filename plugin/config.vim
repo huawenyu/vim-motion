@@ -176,3 +176,14 @@ function! VimMotionPreview()
 endfun
 
 
+function! VimMotionTag()
+    let oline = line('.')
+    let opos = getpos('.')
+    exec ":tag "..utils#GetSelected('n')
+    let cline = line('.')
+    if cline != oline
+        norm zz
+    else
+        call setpos('.', opos)
+    endif
+endfun
